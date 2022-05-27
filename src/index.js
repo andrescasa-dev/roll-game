@@ -17,26 +17,10 @@ const orc = {
 
 function renderCharacter({id, name, avatar, health, diceCount}){
   
-  //===============set diceHTML using for (imperative programming)===============//
-  // function fillDice(diceCount, diceRoll){
-  //   let diceHtml = "";
-  //   for (let i = 0; i < diceCount; i++) {
-  //     diceHtml += `<div class="dice">${diceRoll[i]}</div>`;
-  //   }
-  //   return diceHtml
-  // }
-  // let diceHTML = fillDice(diceCount, diceRoll);
-  //===============set diceHTML using for (imperative programming)===============//
-  
-  function getDiceRoll(diceCount){
-    let diceRoll = []
-    for (let i = 0; i < diceCount; i++) {
-      diceRoll.push(Math.floor(Math.random() * 10 + 1));
-    }
-    return diceRoll
-  }
+  const getDiceRolledArray = ()=> new Array(diceCount).fill(undefined).map((p, i, arr) => arr[i] = Math.floor(Math.random() * 10 + 1));
+  const diceRoll = getDiceRolledArray();
 
-  let diceHTML = getDiceRoll(diceCount).reduce((acc, dice) => acc + `<div class="dice">${dice}</div>`, '');
+  let diceHTML = diceRoll.reduce((acc, dice) => acc + `<div class="dice">${dice}</div>`, '');
 
   document.getElementById(id).innerHTML = 
   `
@@ -48,6 +32,28 @@ function renderCharacter({id, name, avatar, health, diceCount}){
   </div>
   `
   
+ /* -------------------------------------------------------------------------- */
+ /*               set diceHTML using for (imperative programming)              */
+ /* -------------------------------------------------------------------------- */
+  // function fillDice(diceCount, diceRoll){
+  //   let diceHtml = "";
+  //   for (let i = 0; i < diceCount; i++) {
+  //     diceHtml += `<div class="dice">${diceRoll[i]}</div>`;
+  //   }
+  //   return diceHtml
+  // }
+  // let diceHTML = fillDice(diceCount, diceRoll);
+  
+  /* -------------------------------------------------------------------------- */
+  /*                         Replaced by const getDiceRolledArray               */
+  /* -------------------------------------------------------------------------- */
+  // function getDiceRoll(diceCount){
+  //   let diceRoll = []
+  //   for (let i = 0; i < diceCount; i++) {
+  //     diceRoll.push();
+  //   }
+  //   return diceRoll
+  // }
 }
 
 renderCharacter(hero);
