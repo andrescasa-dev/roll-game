@@ -1,4 +1,4 @@
-export class Character {
+export default class Character {
   constructor(data){
     Object.assign(this, data);
   }
@@ -22,12 +22,6 @@ export class Character {
     `
   }
   
-  get id() {
-    return this._id
-  }
-  set id(value) {
-    this._id = value
-  }
   get name() {
     return this._name
   }
