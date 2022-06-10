@@ -1,24 +1,25 @@
 import characterData from './data.js';
 import Character from './Character.js';
 import { privateProperties, compose } from '../utils/myUtils.js';
-const mount = document.getElementById('mount');
+const characters = [];
+const characterCards = document.getElementById('mount').children
 
-function createCharacters(){
-  const characters = [];
+function setCharacters(){
   for (const keyCharacter in characterData) {
     characters.push(new Character(privateProperties(characterData[keyCharacter])));
+  }  
+}
+
+function renderCharacters(){
+  //warning: its taken for granted that there is the same number of characters as of characterCards
+  characters.forEach((character, i) => characterCards[i].innerHTML = character.getInnerHtml())
+}
+
+document.body.addEventListener('click', (e) => {
+  if(e.target.matches('#attack-button')){
+    renderCharacters();
   }
-  return characters
-}
+})
 
-function renderCharacters(characters){
-  const fragment = new DocumentFragment();
-  characters.forEach( character => {
-    const div = document.createElement('div');
-    div.innerHTML = character.getInnerHtml();
-    fragment.appendChild(div)
-  });
-  mount.appendChild(fragment);
-}
-
-compose(renderCharacters, createCharacters)();
+setCharacters();
+renderCharacters();

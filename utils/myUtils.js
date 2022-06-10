@@ -11,4 +11,4 @@ export function privateProperties(obj){
   return copy;
 }
 
-export const compose = (...fns) => (initial) => fns.reduceRight((acc, fn) => { debugger; return fn(acc)}, initial);
+export const compose = (...fns) => (initial) => fns.reduceRight((acc, fn) => { return fn(acc)}, initial);
