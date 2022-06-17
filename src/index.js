@@ -24,8 +24,17 @@ document.body.addEventListener('click', (e) => {
     characters.forEach(character => character.diceRoll());
     characters.forEach((character) => character.takeDamage(character.enemy.getDiceScore()));
     renderCharacters();
+    let isSomeDead = characters.some(character => character.isDead);
+    if(isSomeDead) endGame();
   }
 })
+//create a funciton that return alive(winner), someOneAlive[] ?  winner : tie 
+function endGame(){
+  //at least one dead, it's to say, there may or may not one alive
+  const winner = characters.find(character => !character.isDead);
+  winner ? alert(`The ${winner.name} is Victorious`) 
+    : alert('No victors - all creatures are dead')
+}
 
 setCharacters();
 renderCharacters();

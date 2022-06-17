@@ -1,12 +1,19 @@
 export default class Character {
   constructor(data){
-    Object.assign(this, data);
+    //writable: false (except the health)
+    
+    const {_health, ...readOnlyProps } = data
+    Object.assign(this, { _health });
+    for (const key in readOnlyProps) {
+      Object.defineProperty(this, key, {value: readOnlyProps[key], writable: false, configurable: false})
+    }
     this._diceArray = [];
     this._enemy;
+    this._isDead;
   }
 
   getDiceRolledArray(){
-    return new Array(this.diceCount).fill(undefined).map((p, i, arr) => arr[i] = Math.floor(Math.random() * 10 + 1));
+    return new Array(this._diceCount).fill(undefined).map((p, i, arr) => arr[i] = Math.floor(Math.random() * 10 + 1));
   }
 
   getDiceContent(){
@@ -15,7 +22,7 @@ export default class Character {
       diceContent = this._diceArray
         .reduce((acc, dice) => acc + `<div class="dice">${dice}</div>`, '')
     else
-       diceContent = new Array(this.diceCount)
+       diceContent = new Array(this._diceCount)
         .fill(`<div class="placeholder-dice"></div>`)
         .reduce((innerHtml, div) => innerHtml + div ,'');
     return diceContent;       
@@ -25,13 +32,13 @@ export default class Character {
     this._diceArray = this.getDiceRolledArray();
     return ;
   }
-  // this method could be wrong 
-  getInnerHtml(diceRolled = false){
+  
+  getInnerHtml(){
     return`
     <div class="character-card">
-      <h4 class="name"> ${this.name} </h4>
-      <img class="avatar" src="${this.avatar}"/>
-      <p class="health">health: <b> ${this.health} </b></p>
+      <h4 class="name"> ${this._name} </h4>
+      <img class="avatar" src="${this._avatar}"/>
+      <p class="health">health: <b> ${this._health} </b></p>
       <div class="dice-container"> ${this.getDiceContent()}</div>
     </div>
     `
@@ -43,6 +50,8 @@ export default class Character {
 
   takeDamage(damage){
     console.log(`${this._name} was damage with ${damage} points`)
+    this._health =  this._health - damage < 0 ? 0 : this._health - damage;
+    this._isDead = this._health === 0; 
   }
   
   get enemy(){
@@ -53,28 +62,15 @@ export default class Character {
     this._enemy = character
   }
 
-  get name() {
-    return this._name
+  get isDead(){
+    return this._isDead
   }
-  set name(value) {
-    this._name = value
+
+  set isDead(value){
+    console.error('isDead property should no be modified');
   }
-  get avatar() {
-    return this._avatar
-  }
-  set avatar(value) {
-    this._avatar = value
-  }
-  get health() {
-    return this._health
-  }
-  set health(value) {
-    this._health = value
-  }
-  get diceCount() {
-    return this._diceCount
-  }
-  set diceCount(value) {
-    this._diceCount = value
+
+  get name(){
+    return this._name;
   }
 }
