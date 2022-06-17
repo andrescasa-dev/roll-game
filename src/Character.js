@@ -1,12 +1,10 @@
 export default class Character {
   constructor(data){
-    //writable: false (except the health)
-    
-    const {_health, ...readOnlyProps } = data
-    Object.assign(this, { _health });
-    for (const key in readOnlyProps) {
-      Object.defineProperty(this, key, {value: readOnlyProps[key], writable: false, configurable: false})
+    //read only properties
+    for (const key in data) {
+      Object.defineProperty(this, key, {value: data[key], writable: false, configurable: false})
     }
+    this._health = data['_maxHealth'];
     this._diceArray = [];
     this._enemy;
     this._isDead;
@@ -32,17 +30,6 @@ export default class Character {
     this._diceArray = this.getDiceRolledArray();
     return ;
   }
-  
-  getInnerHtml(){
-    return`
-    <div class="character-card">
-      <h4 class="name"> ${this._name} </h4>
-      <img class="avatar" src="${this._avatar}"/>
-      <p class="health">health: <b> ${this._health} </b></p>
-      <div class="dice-container"> ${this.getDiceContent()}</div>
-    </div>
-    `
-  }
 
   getDiceScore(){
     return this._diceArray.reduce((score, dice)=> score + dice, 0)
@@ -54,6 +41,34 @@ export default class Character {
     this._isDead = this._health === 0; 
   }
   
+
+  getHealthPercentage(){
+    return 100 * this._health / this._maxHealth;
+  }
+
+  getHTMLHealthBar(){
+    const percent = this.getHealthPercentage();
+    return `
+    <div class="health-bar-outer">
+      <div class="health-bar-inner ${percent < 25 ? 'danger' : '' }" style="width: ${percent}% ;">
+      </div>
+    </div>`
+  }
+
+  getInnerHtml(){
+    return`
+    <div class="character-card">
+      <h4 class="name"> ${this._name} </h4>
+      <img class="avatar" src="${this._avatar}"/>
+      <p class="health">health: <b> ${this._health} </b></p>
+      ${this.getHTMLHealthBar()}
+      <div class="dice-container"> 
+        ${this.getDiceContent()}
+      </div>
+    </div>
+    `
+  }
+
   get enemy(){
     return this._enemy;
   }
