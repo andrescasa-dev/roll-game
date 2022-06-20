@@ -1,32 +1,42 @@
-import characterData from './data.js';
+import data from './data.js';
 import Character from './Character.js';
-import { privateProperties, compose } from '../utils/myUtils.js';
+import { objPrivProp, compose } from '../utils/myUtils.js';
 
 //use a map in order to create the follow relation
-const characters = [];
+const herosData = [...data.heros];
+const monstersData = [...data.monsters];
+const actualPair =  {}
 
+const getNewHero = () => new Character(objPrivProp(herosData.shift()));
+const getNewMonster = () =>  new Character(objPrivProp(monstersData.shift()));
 
-function setCharacters(){
-  characters.length = 0;
-  for (const keyCharacter in characterData) {
-    characters.push(new Character(privateProperties(characterData[keyCharacter])));
-  }
-  characters[0].enemy = characters[1];
-  characters[1].enemy = characters[0];
+function startGame(){
+  renderPlayGround(); 
+  actualPair.hero = getNewHero();
+  actualPair.monster = getNewMonster();
+  setActualRivals();
+  renderActualCharacters();
 }
 
-function renderCharacters(){
-  //warning: its taken for granted that there is the same number of characters as of characterCards
-  const characterCards = document.getElementById('characters_container').children
-  characters.forEach((character, i) => characterCards[i].innerHTML = character.getInnerHtml())
+
+function setActualRivals(){
+  actualPair.hero.enemy = actualPair.monster
+  actualPair.monster.enemy = actualPair.hero
+}
+
+function renderActualCharacters(){
+  const divMonsters = document.getElementById("monsters");
+  const divHeros = document.getElementById("heros");
+  divHeros.innerHTML = actualPair.hero.getInnerHtml();
+  divMonsters.innerHTML = actualPair.monster.getInnerHtml();
 }
 
 function renderPlayGround(){
   document.body.innerHTML = 
   `<main id="characters_container">
-      <div id="hero">              
+      <div id="heros">              
       </div>
-      <div id="monster">
+      <div id="monsters">
       </div>    
     </main>
     <section id="actions">
@@ -34,24 +44,10 @@ function renderPlayGround(){
     </section>`
 }
 
-document.body.addEventListener('click', (e) => {
-  if(e.target.matches('#attack-button')){
-    characters.forEach(character => character.diceRoll());
-    characters.forEach((character) => character.takeDamage(character.enemy.getDiceScore()));
-    renderCharacters();
-    let isSomeDead = characters.some(character => character.isDead);
-    if(isSomeDead) endGame();
-  }
-  if(e.target.matches('#playAgain')){
-    startGame();
-  }
-})
-
-
 function endGame(){
   //at least one dead, it's to say, there may or may not one alive
-  const winner = characters.find(character => !character.isDead);
-  let emoji = winner === characters[0] ? '🔮' : '☠️';
+  const winner = Object.values(actualPair).find(character => !character.isDead);
+  let emoji = winner === actualPair.hero ? '🔮' : '☠️';
   let msg = winner ? ` The ${winner.name} is Victorious` 
   : `No victors - all creatures are dead`;
   document.body.innerHTML = 
@@ -61,16 +57,38 @@ function endGame(){
     <p class="end-emoji">${emoji}</p>
   </div>
   <section id="actions">
-    <button id="playAgain">Play again</button>
+    <button id="playAgain">playAgain</button>
   </section>
   ` 
 }
 
-function startGame(){
-  renderPlayGround();
-  setCharacters();
-  renderCharacters();
-}
+
+
+document.body.addEventListener('click', (e) => {
+  if(e.target.matches('#attack-button')){
+    //apply damage
+    Object.values(actualPair).forEach( character => character.diceRoll())
+    Object.values(actualPair).forEach( character => character.takeDamage(character.enemy.getDiceScore()));
+    //render damage
+    renderActualCharacters();
+    
+    //reload enemy and finish the game
+    if(actualPair.monster.isDead || actualPair.hero.isDead){
+      if(monstersData.length !== 0){
+        actualPair.monster = getNewMonster();
+        setActualRivals();
+        renderActualCharacters();
+      }
+      else{
+        endGame();
+      }
+    }
+    
+  }
+  if(e.target.matches('#playAgain')){
+    location.reload();
+  }
+})
 
 startGame();
 

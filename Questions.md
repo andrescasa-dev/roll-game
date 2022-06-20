@@ -10,3 +10,4 @@ This is useful when we want to declare a constant-like property.
 ```js
 Object.defineProperty(this, "_isDead", {writable: false, configurable: false}); in the constructor
 ```
+# ¿What is an how to create scalable software?
