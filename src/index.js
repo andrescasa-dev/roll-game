@@ -6,7 +6,6 @@ import { objPrivProp, compose } from '../utils/myUtils.js';
 const herosData = [...data.heros];
 const monstersData = [...data.monsters];
 const actualPair =  {}
-
 const getNewHero = () => new Character(objPrivProp(herosData.shift()));
 const getNewMonster = () =>  new Character(objPrivProp(monstersData.shift()));
 
@@ -62,17 +61,22 @@ function endGame(){
   ` 
 }
 
-
-
-document.body.addEventListener('click', (e) => {
+document.body.addEventListener('click', async (e) => {
   if(e.target.matches('#attack-button')){
     //apply damage
     Object.values(actualPair).forEach( character => character.diceRoll())
     Object.values(actualPair).forEach( character => character.takeDamage(character.enemy.getDiceScore()));
-    //render damage
+    //render damage result
     renderActualCharacters();
+    e.target.disabled = true;
+
+    await new Promise((resolve, reject)=>{
+      setTimeout(()=>{
+        resolve(console.log('time out'))
+      }, 2000)
+    })
     
-    //reload enemy and finish the game
+    e.target.disabled = false;
     if(actualPair.monster.isDead || actualPair.hero.isDead){
       if(monstersData.length !== 0){
         actualPair.monster = getNewMonster();
@@ -83,6 +87,8 @@ document.body.addEventListener('click', (e) => {
         endGame();
       }
     }
+    
+    
     
   }
   if(e.target.matches('#playAgain')){
