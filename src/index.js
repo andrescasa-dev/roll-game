@@ -6,6 +6,7 @@ import { objPrivProp, compose } from '../utils/myUtils.js';
 const herosData = [...data.heros];
 const monstersData = [...data.monsters];
 const actualPair =  {}
+
 const getNewHero = () => new Character(objPrivProp(herosData.shift()));
 const getNewMonster = () =>  new Character(objPrivProp(monstersData.shift()));
 
@@ -23,11 +24,17 @@ function setActualRivals(){
   actualPair.monster.enemy = actualPair.hero
 }
 
-function renderActualCharacters(){
+async function renderActualCharacters(){
   const divMonsters = document.getElementById("monsters");
   const divHeros = document.getElementById("heros");
   divHeros.innerHTML = actualPair.hero.getInnerHtml();
   divMonsters.innerHTML = actualPair.monster.getInnerHtml();
+
+  await new Promise((resolve, reject)=>{setTimeout(()=>{resolve(console.log("time out"))}, 2000)})
+}
+
+function renderCard(type, html){
+
 }
 
 function renderPlayGround(){
@@ -61,38 +68,36 @@ function endGame(){
   ` 
 }
 
+// this.diceRoll();
+// this._enemy.takeEnemyDamage();
+
 document.body.addEventListener('click', async (e) => {
   if(e.target.matches('#attack-button')){
-    //apply damage
-    Object.values(actualPair).forEach( character => character.diceRoll())
-    Object.values(actualPair).forEach( character => character.takeDamage(character.enemy.getDiceScore()));
-    //render damage result
-    renderActualCharacters();
     e.target.disabled = true;
+    actualPair.hero.attack();
+    await renderActualCharacters();
 
-    await new Promise((resolve, reject)=>{
-      setTimeout(()=>{
-        resolve(console.log('time out'))
-      }, 2000)
-    })
+    //check death / new monster
     
-    e.target.disabled = false;
     if(actualPair.monster.isDead || actualPair.hero.isDead){
       if(monstersData.length !== 0){
         actualPair.monster = getNewMonster();
         setActualRivals();
-        renderActualCharacters();
+        await renderActualCharacters();
       }
       else{
         endGame();
       }
     }
-    
-    
-    
+    else{
+      actualPair.monster.attack()
+      await renderActualCharacters();
+    }
+    e.target.disabled = false;
   }
   if(e.target.matches('#playAgain')){
     location.reload();
+    
   }
 })
 

@@ -206,3 +206,18 @@ button:focus { outline: 0 }
 .end-emoji{
   font-size: 80px;
 }
+
+.character-dmgReceived{
+  color: red;
+  opacity: 0;
+  animation: vanish 2s ease-in-out;
+}
+
+@keyframes vanish {
+  from{
+    opacity: 1;
+  }
+  to{
+    opacity: 0;
+  }
+}

@@ -8,13 +8,15 @@ export default class Character {
     this._diceArray = [];
     this._enemy;
     this._isDead;
+    this._diceScore;
+    this._dmgReceivedHTML = 0;
   }
 
   getDiceRolledArray(){
     return new Array(this._diceCount).fill(undefined).map((p, i, arr) => arr[i] = Math.floor(Math.random() * 10 + 1));
   }
 
-  getDiceContent(){
+  getDiceHTML(){
     let diceContent ='';
     if(this._diceArray.length !== 0)
       diceContent = this._diceArray
@@ -28,17 +30,25 @@ export default class Character {
 
   diceRoll(){
     this._diceArray = this.getDiceRolledArray();
-    return ;
+    this.__diceScore = this._diceArray.reduce((score, dice)=> score + dice, 0);
+    return this;
   }
 
-  getDiceScore(){
-    return this._diceArray.reduce((score, dice)=> score + dice, 0)
+  get diceScore(){
+    return this.__diceScore
   }
 
-  takeDamage(damage){
-    console.log(`${this._name} was damage with ${damage} points`)
-    this._health =  this._health - damage < 0 ? 0 : this._health - damage;
+  attack(){
+    this.diceRoll();
+    this._enemy.takeEnemyDamage();
+  }
+
+  takeEnemyDamage(){
+    const damage = this.enemy.diceScore;
+    const leftOverHealth = this._health - damage;
+    this._health = leftOverHealth < 0 ? 0 : leftOverHealth;
     this._isDead = this._health === 0; 
+    this._dmgReceivedHTML = damage * -1;
   }
   
 
@@ -46,7 +56,7 @@ export default class Character {
     return 100 * this._health / this._maxHealth;
   }
 
-  getHTMLHealthBar(){
+  getHealthBarHTML(){
     const percent = this.getHealthPercentage();
     return `
     <div class="health-bar-outer">
@@ -60,13 +70,19 @@ export default class Character {
     <div class="character-card">
       <h4 class="name"> ${this._name} </h4>
       <img class="avatar" src="${this._avatar}"/>
-      <p class="health">health: <b> ${this._health} </b></p>
-      ${this.getHTMLHealthBar()}
+      <p class="health">health: <b> ${this._health} </b> ${this.getDmgReceivedHTML()}</p>
+      ${this.getHealthBarHTML()}
       <div class="dice-container"> 
-        ${this.getDiceContent()}
+        ${this.getDiceHTML()}
       </div>
     </div>
     `
+  }
+  
+  getDmgReceivedHTML(){
+    const html = this._dmgReceivedHTML ? `<span class="character-dmgReceived"> ${this._dmgReceivedHTML}</span>` : ''    
+    this._dmgReceivedHTML = 0;
+    return html;
   }
 
   get enemy(){
