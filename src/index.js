@@ -1,106 +1,122 @@
 import data from './data.js';
-import Character from './Character.js';
+import Hero from './Hero.js';
+import Monster from './Monster.js';
 import { objPrivProp, compose } from '../utils/myUtils.js';
 
-//use a map in order to create the follow relation
-const herosData = [...data.heros];
-const monstersData = [...data.monsters];
-const actualPair =  {}
+class App{
+  constructor(){
+    this.$playground = document.querySelector('#playground')
+    this.$modal_endgame = document.querySelector('#modal-end-game')
+    this.$monster = document.querySelector('#monster')
+    this.$hero = document.querySelector('#hero');
+    this.$btn_attack = document.querySelector('#attack-button')
+    this.$btn_playAgain = document.querySelector('#playAgain');
+    this.addEventListeners();
 
-const getNewHero = () => new Character(objPrivProp(herosData.shift()));
-const getNewMonster = () =>  new Character(objPrivProp(monstersData.shift()));
+    this.herosList = [];
+    this.monstersList = [];
+    this.actualPair =  {};
 
-function startGame(){
-  renderPlayGround(); 
-  actualPair.hero = getNewHero();
-  actualPair.monster = getNewMonster();
-  setActualRivals();
-  renderActualCharacters();
-}
-
-
-function setActualRivals(){
-  actualPair.hero.enemy = actualPair.monster
-  actualPair.monster.enemy = actualPair.hero
-}
-
-async function renderActualCharacters(){
-  const divMonsters = document.getElementById("monsters");
-  const divHeros = document.getElementById("heros");
-  divHeros.innerHTML = actualPair.hero.getInnerHtml();
-  divMonsters.innerHTML = actualPair.monster.getInnerHtml();
-
-  await new Promise((resolve, reject)=>{setTimeout(()=>{resolve(console.log("time out"))}, 2000)})
-}
-
-function renderCard(type, html){
-
-}
-
-function renderPlayGround(){
-  document.body.innerHTML = 
-  `<main id="characters_container">
-      <div id="heros">              
-      </div>
-      <div id="monsters">
-      </div>    
-    </main>
-    <section id="actions">
-        <button id="attack-button">Attack</button>
-    </section>`
-}
-
-function endGame(){
-  //at least one dead, it's to say, there may or may not one alive
-  const winner = Object.values(actualPair).find(character => !character.isDead);
-  let emoji = winner === actualPair.hero ? '🔮' : '☠️';
-  let msg = winner ? ` The ${winner.name} is Victorious` 
-  : `No victors - all creatures are dead`;
-  document.body.innerHTML = 
-  `<div class="end-game">
-    <h2>Game Over</h2>
-    <h3>${msg}</h3>
-    <p class="end-emoji">${emoji}</p>
-  </div>
-  <section id="actions">
-    <button id="playAgain">playAgain</button>
-  </section>
-  ` 
-}
-
-// this.diceRoll();
-// this._enemy.takeEnemyDamage();
-
-document.body.addEventListener('click', async (e) => {
-  if(e.target.matches('#attack-button')){
-    e.target.disabled = true;
-    actualPair.hero.attack();
-    await renderActualCharacters();
-
-    //check death / new monster
-    
-    if(actualPair.monster.isDead || actualPair.hero.isDead){
-      if(monstersData.length !== 0){
-        actualPair.monster = getNewMonster();
-        setActualRivals();
-        await renderActualCharacters();
-      }
-      else{
-        endGame();
-      }
-    }
-    else{
-      actualPair.monster.attack()
-      await renderActualCharacters();
-    }
-    e.target.disabled = false;
+    this.startGame();
   }
-  if(e.target.matches('#playAgain')){
-    location.reload();
-    
+
+  startGame(){
+    this.herosList = data.heros.map( data => new Hero(objPrivProp(data)));
+    this.monstersList = data.monsters.map( data => new Monster(objPrivProp(data)));
+    this.hero = this.herosList.shift();
+    this.monster = this.monstersList.shift();
+    console.log(this.hero instanceof Hero)
+    this.setActualRivals();
+    this.renderHero();
+    this.renderMonster();
   }
-})
 
-startGame();
+  setActualRivals(){
+    this.hero.enemy = this.monster
+    this.monster.enemy = this.hero
+  }
 
+  animationTimeOut(seconds){    
+    return new Promise((resolve, reject)=>{setTimeout(()=>{resolve(console.log("2s time out"))}, seconds)})
+  }
 
+  endGame(winner){
+    const emoji = winner === this.hero ? '🔮' : '☠️';
+    const msg = winner ? ` The ${winner.name} is Victorious` : `No victors - all creatures are dead`;
+    this.$modal_endgame.querySelector('#end-game--message').textContent = msg;
+    this.$modal_endgame.querySelector('#end-game--emoji').textContent = emoji;
+
+    this.toggleModalRender(this.$modal_endgame);
+  } 
+
+  async renderNextMonster(){
+    this.monster = this.monstersList.shift();
+    this.setActualRivals();
+    await this.renderMonster();
+  }
+
+  async renderAttack(character){
+    character.attack();
+    await this.renderActualCharacter(character)
+    await this.renderActualCharacter(character.enemy)
+  }
+
+  async renderActualCharacter(character){
+    const element = typeof character === 'Hero' ? this.$hero : this.$monster;
+    element.innerHTML = character.innerHTML();
+  }
+
+  renderMonster(){
+    this.$monster.innerHTML = this.monster.getInnerHtml();
+    return this.animationTimeOut(1000);
+  }
+
+  renderHero(){
+    this.$hero.innerHTML = this.hero.getInnerHtml();
+    return this.animationTimeOut(1000);
+  }
+
+  
+  async attackHandler(){
+    this.$btn_attack.disabled = true;
+    await this.renderAttack(this.hero);
+    // si murio el monstru y hay más render el siguiente
+    // si murio el monstruo y no hay más end the game hero is the winner
+    // si murio el hero end the game
+    // si murio el hero y el monster end game es empate
+    const areThereEnemies = this.monstersList.length !== 0;
+    const someDead = this.hero.isDead || this.monster.isDead;
+    const bothDead = this.hero.isDead && this.monster.isDead;
+
+    if(someDead){
+      bothDead ? this.endGame(undefined) :
+      this.hero.isDead ? this.endGame(this.monster) :
+      areThereEnemies ? await this.renderNextMonster() : this.endGame(this.hero);
+    }
+    else await this.renderAttack(this.monster);
+
+    this.$btn_attack.disabled = false;
+  }
+
+  toggleModalRender(modal){
+    this.$playground.classList.toggle('hide');
+    modal.classList.toggle('hide');
+  }
+
+  playAgainHandler(){
+    this.toggleModalRender(this.$modal_endgame);
+    this.startGame();
+  }
+
+  addEventListeners(){
+    this.$btn_attack.addEventListener('click',  async ()=>{
+      await this.attackHandler();
+    })
+
+    this.$btn_playAgain.addEventListener('click', ()=>{
+      this.playAgainHandler();
+    })
+  }
+}
+
+new App();

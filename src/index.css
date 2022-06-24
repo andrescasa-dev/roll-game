@@ -15,11 +15,23 @@ main {
   flex-direction: column;
   align-items: center;
   margin-top: .5rem;
-} 
+  gap: 30px;
+}
+
+.characters-container{
+  display: flex;
+  flex-direction: column;
+  gap: 1.2em;
+}
 
 @media(min-width:550px){
- main {
-      flex-direction: row;
+  .characters-container{
+    display: flex;
+    flex-direction: row;
+    gap: 5vw;
+  }
+  
+  main {
       margin:6vh 5vw;
       justify-content: center;
       width:86vw;
@@ -220,4 +232,9 @@ button:focus { outline: 0 }
   to{
     opacity: 0;
   }
+}
+
+.hide{
+  display: none;
+  visibility: none;
 }

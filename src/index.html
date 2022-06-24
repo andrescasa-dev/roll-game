@@ -12,5 +12,28 @@
   <script src="./index.js" type="module" defer></script>
 </head>
 <body>
+  <main id="playground">
+    <section class="characters-container">
+      <div id="hero" class="character-card">              
+      </div>
+      <div id="monster" class="character-card">
+      </div>
+    </section>
+    <section id="actions">
+      <button id="attack-button">Attack</button>
+    </section>
+  </main>
+
+  <section id="modal-end-game" class="modal-end-game hide">
+    <div class="end-game">
+    <h2>Game Over</h2>
+    <h3 id="end-game--message"></h3>
+    <p class="end-emoji" id="end-game--emoji"></p>
+    </div>
+    <section id="actions">
+      <button id="playAgain">playAgain</button>
+    </section>
+  </section>
+  
 </body>
 </html>

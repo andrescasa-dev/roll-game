@@ -67,14 +67,12 @@ export default class Character {
 
   getInnerHtml(){
     return`
-    <div class="character-card">
-      <h4 class="name"> ${this._name} </h4>
-      <img class="avatar" src="${this._avatar}"/>
-      <p class="health">health: <b> ${this._health} </b> ${this.getDmgReceivedHTML()}</p>
-      ${this.getHealthBarHTML()}
-      <div class="dice-container"> 
-        ${this.getDiceHTML()}
-      </div>
+    <h4 class="name"> ${this._name} </h4>
+    <img class="avatar" src="${this._avatar}"/>
+    <p class="health">health: <b> ${this._health} </b> ${this.getDmgReceivedHTML()}</p>
+    ${this.getHealthBarHTML()}
+    <div class="dice-container"> 
+      ${this.getDiceHTML()}
     </div>
     `
   }
